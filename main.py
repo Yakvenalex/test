@@ -1,6 +1,5 @@
 from pyrogram import Client, filters
-from pydub import AudioSegment
-from pydub.playback import play
+
 
 # Создание объекта клиента
 api_id = 22802758
@@ -16,19 +15,12 @@ def handle_media(client, message):
     # Определение типа файла (аудио или голосовое сообщение)
     if message.audio:
         file_name = 'audio.mp3'
-    elif message.voice:
-        file_name = 'voice.ogg'
+            
+        # Сохранение файла в указанную папку
+        file_path = save_folder + file_name
+        message.download(file_path)
+        print(f'Файл "{file_name}" сохранен.')
 
-    # Сохранение файла в указанную папку
-    file_path = save_folder + file_name
-    message.download(file_path)
-    print(f'Файл "{file_name}" сохранен.')
-
-    # Загрузка аудиофайла с помощью PyDub
-    audio = AudioSegment.from_file(file_path)
-
-    # Воспроизведение аудиофайла
-    play(audio)
 
 # Запуск клиента
 if __name__ == '__main__':
