@@ -1,36 +1,30 @@
-from pyrogram import Client, filters
-import os
-import asyncio
+from telethon.sync import TelegramClient
+from telethon import events
 
-# Создание объекта клиента
+# Ваши данные авторизации Telegram API
 api_id = 22802758
 api_hash = 'aa30ff3d5301ee9fe860d04349fd5e18'
-client = Client('my_bot', api_id, api_hash)
 
-# Путь к папке для сохранения файлов
-save_folder = 'audio/'
+# Путь к папке для сохранения mp3 файлов
+save_folder = 'audio'
 
-# Обработчик новых аудиофайлов и голосовых сообщений
-@client.on_message(filters.audio)
-async def handle_media(client, message):
-    # Определение типа файла (аудио или голосовое сообщение)
-    if message.audio:
-        file_name = 'audio.mp3'
-        print(f'Файл "{file_name}" Обнаружен! Приступаю к сохранению.')
+# Создание клиента Telegram
+client = TelegramClient('userbot_session', api_id, api_hash)
 
-        # Сохранение файла в указанную папку в асинхронном режиме
-        file_path = save_folder + file_name
-        await message.download(file_path)
-        print(f'Файл "{file_name}" сохранен.')
+# Обработчик событий новых входящих сообщений
+@client.on(events.NewMessage)
+async def handle_new_message(event):
+    if event.message.media and event.message.media.document:
+        # Проверяем, является ли файл mp3
+        if event.message.media.document.mime_type == 'audio/mpeg':
+            file_path = f'audio/audio.mp3'
 
+            # Скачиваем файл
+            await client.download_media(event.message, file_path)
 
-# Запуск клиента
-if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    try:
-        loop.run_until_complete(client.run())
-    except KeyboardInterrupt:
-        pass
-    finally:
-        loop.run_until_complete(client.stop())
-        loop.close()
+            print(f'Файл audio.mp3 сохранен в audio!')
+
+while True:
+    with client:
+        # Запускаем обработчик событий входящих сообщений
+        client.run_until_disconnected()
